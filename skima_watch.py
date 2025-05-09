@@ -16,17 +16,24 @@ with shelve.open(DB_PATH) as db:
 
     html  = requests.get(BASE_URL, headers={"User-Agent":"Mozilla/5.0"}).text
     soup  = bs4.BeautifulSoup(html, "html.parser")
-    items = {a["href"].split("=")[1]
-             for a in soup.select('a[href*=\"/item/detail?item_id=\"]')}
-
-    print("取得した item_id:", list(items)[:10], "… (全", len(items), "件)")
+    selector = 'a[href^="/item/detail"]'           # 汎用化
+    items = set()
+    for a in soup.select(selector):
+        m = re.search(r'\d+', a['href'])
+        if m:
+            items.add(m.group())
     
-    for iid in items - prev:
-        url = f"https://skima.jp/item/detail?item_id={iid}"
-        resp = requests.post(IFTTT_URL, json={"value1": url})
-        print("POST",url)
-        print("→",resp.status_code, resp.text[:120])
-        resp.raise_for_status()
+    print("取得:", len(items), "件", list(items)[:5])
+    
+    new = items - prev
+    print("新規:", new)
+    
+    for iid in new:
+        data = {"value1": f"https://skima.jp/item/detail?item_id={iid}"}
+        r = requests.post(IFTTT_URL, json=data)
+        print("POST", iid, "→", r.status_code)
+        r.raise_for_status()
+
 
     if items != prev:
         db["items"] = list(items)
