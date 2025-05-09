@@ -9,8 +9,9 @@ IFTTT_URL = f"{IFTTT_KEY}"
 CACHE     = pathlib.Path(".cache")
 CACHE.mkdir(exist_ok=True)
 DB_PATH   = str(CACHE / "items.db")
-
+print("TEST1")
 with shelve.open(DB_PATH) as db:
+    print("TEST2")
     prev = set(db.get("items", []))
 
     html  = requests.get(BASE_URL, headers={"User-Agent":"Mozilla/5.0"}).text
@@ -22,7 +23,7 @@ with shelve.open(DB_PATH) as db:
         url = f"https://skima.jp/item/detail?item_id={iid}"
         resp = requests.post(IFTTT_URL, json={"value1": url})
         print("POST",url)
-        print("→",resp.status_cod, resp.text[:120])
+        print("→",resp.status_code, resp.text[:120])
         resp.raise_for_status()
 
     if items != prev:
