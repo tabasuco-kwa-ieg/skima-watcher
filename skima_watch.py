@@ -19,6 +19,8 @@ with shelve.open(DB_PATH) as db:
     items = {a["href"].split("=")[1]
              for a in soup.select('a[href*=\"/item/detail?item_id=\"]')}
 
+    print("取得した item_id:", list(items)[:10], "… (全", len(items), "件)")
+    
     for iid in items - prev:
         url = f"https://skima.jp/item/detail?item_id={iid}"
         resp = requests.post(IFTTT_URL, json={"value1": url})
