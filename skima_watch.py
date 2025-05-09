@@ -13,7 +13,11 @@ print("TEST1")
 with shelve.open(DB_PATH) as db:
     prev = set(db.get("items", []))
 
-    html  = requests.get(BASE_URL, headers={"User-Agent":"Mozilla/5.0"}).text
+    html = requests.get(BASE_URL, headers={"User-Agent": "Mozilla/5.0"}).text
+    with open("dump.html", "w", encoding="utf-8") as f:
+        f.write(html[:5000])        # 先頭 5,000 文字だけでも OK
+    print("HTML length:", len(html))
+
     soup  = bs4.BeautifulSoup(html, "html.parser")
     selector = 'a[href^="/item/detail"]'           # 汎用化
     items = set()
