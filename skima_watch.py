@@ -11,17 +11,19 @@ CACHE.mkdir(exist_ok=True)
 DB_PATH   = str(CACHE / "items.db")
 print("TEST1")
 with shelve.open(DB_PATH) as db:
-    print("TEST2")
     prev = set(db.get("items", []))
 
     html  = requests.get(BASE_URL, headers={"User-Agent":"Mozilla/5.0"}).text
     soup  = bs4.BeautifulSoup(html, "html.parser")
     selector = 'a[href^="/item/detail"]'           # 汎用化
     items = set()
+    print("TEST2")
     for a in soup.select(selector):
+        print("TEST2-1")
         m = re.search(r'\d+', a['href'])
         if m:
             items.add(m.group())
+            print("TEST2-2")
     
     print("取得:", len(items), "件", list(items)[:5])
     
@@ -29,6 +31,7 @@ with shelve.open(DB_PATH) as db:
     print("新規:", new)
     
     for iid in new:
+        print("TEST3")
         data = {"value1": f"https://skima.jp/item/detail?item_id={iid}"}
         r = requests.post(IFTTT_URL, json=data)
         print("POST", iid, "→", r.status_code)
