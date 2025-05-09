@@ -20,7 +20,10 @@ with shelve.open(DB_PATH) as db:
 
     for iid in items - prev:
         url = f"https://skima.jp/item/detail?item_id={iid}"
-        requests.post(IFTTT_URL, json={"value1": url})
+        resp = requests.post(IFTTT_URL, json={"value1": url})
+        print("POST",url)
+        print("→",resp.status_cod, resp.text[:120])
+        resp.raise_for_status()
 
     if items != prev:
         db["items"] = list(items)
