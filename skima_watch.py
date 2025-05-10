@@ -28,17 +28,6 @@ with shelve.open(DB_PATH) as db:
         if m:
             items.add(m.group())
             print("TEST2-2")
-            
-    now = datetime.utcnow().isoformat()
-    for iid in items:
-        prev.setdefault(iid, now)
-
-    # --- 古い ID を整理 ---
-    cutoff = datetime.utcnow() - timedelta(days=KEEP_DAYS)
-    prev = {iid: ts for iid, ts in prev.items()
-            if datetime.fromisoformat(ts) > cutoff}
-
-    db["items"] = prev
     
     print("取得:", len(items), "件", list(items)[:5])
     
@@ -52,6 +41,17 @@ with shelve.open(DB_PATH) as db:
         print("POST", iid, "→", r.status_code)
         r.raise_for_status()
 
+    # --- 古い ID を整理 ---
+    now = datetime.utcnow().isoformat()
+    for iid in items:
+        prev.setdefault(iid, now)
 
+    cutoff = datetime.utcnow() - timedelta(days=KEEP_DAYS)
+    prev = {iid: ts for iid, ts in prev.items()
+            if datetime.fromisoformat(ts) > cutoff}
+
+    db["items"] = prev
+
+    # --- 差分だけ書き込む ---
     if items != prev:
         db["items"] = list(items)
