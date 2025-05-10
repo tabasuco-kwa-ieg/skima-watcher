@@ -51,7 +51,3 @@ with shelve.open(DB_PATH) as db:
             if datetime.fromisoformat(ts) > cutoff}
 
     db["items"] = prev
-
-    # --- 差分だけ書き込む ---
-    if items != prev:
-        db["items"] = list(items)
