@@ -1,4 +1,4 @@
-import os, requests, bs4, shelve, pathlib
+import re, os, requests, bs4, shelve, pathlib
 
 SELLER_ID = "151777"                      # ←監視したい出品者のID
 BASE_URL  = f"https://skima.jp/profile/dl_products?id={SELLER_ID}"
