@@ -1,10 +1,11 @@
 name: SKIMA watcher
 
 on:
-  schedule:
-    # UTC で 5 分毎。日本時間 (UTC+9) に換算不要＝GitHub では常に UTC
-    - cron: "3/5 * * * *"
-  workflow_dispatch:      # 手動トリガも付けると便利
+  workflow_dispatch: 
+    inputs:
+      reason:
+        description: Called by Deno.cron
+        required: false
 
 jobs:
   run:
