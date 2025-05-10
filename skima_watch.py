@@ -70,8 +70,8 @@ with shelve.open(DB_PATH) as db:
                 "footer": {"text": "opt販売 / 自動通知"}
             }]
         }
-        print(payload)
-        requests.post(IFTTT_URL, json=payload).raise_for_status()
+        maker_json = {"value1": json.dumps(payload)}
+        requests.post(IFTTT_URL, json=maker_json).raise_for_status()
 
     # --- 古い ID を整理 ---
     now = datetime.utcnow().isoformat()
