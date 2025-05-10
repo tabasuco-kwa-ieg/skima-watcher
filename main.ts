@@ -1,9 +1,9 @@
 import "https://deno.land/std@0.221.0/dotenv/load.ts";
 
 const GH_TOKEN = Deno.env.get("GH_PAT")!;          // Deploy › Settings › Variables
-const OWNER    = "yourname";
+const OWNER    = "tabasuco-kwa-ieg";
 const REPO     = "skima-watcher";
-const WORKFLOW = "main.yml";                       // ファイル名 or ID
+const WORKFLOW = "notify.yml";                       // ファイル名 or ID
 const BRANCH   = "main";
 
 const headers = {
