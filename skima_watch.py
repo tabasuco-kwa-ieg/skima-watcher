@@ -1,4 +1,4 @@
-import re, os, requests, bs4, shelve, pathlib
+import json, re, os, requests, bs4, shelve, pathlib
 from datetime import datetime, timedelta
 
 SELLER_ID = "151777"                      # ←監視したい出品者のID
