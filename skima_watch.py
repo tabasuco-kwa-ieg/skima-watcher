@@ -19,7 +19,7 @@ with shelve.open(DB_PATH) as db:
     print("HTML length:", len(html))
 
     soup  = bs4.BeautifulSoup(html, "html.parser")
-    selector = 'a[href^="/item/detail"]'           # 汎用化
+    selector = 'a[href^="/dl/detail"]'           # 汎用化
     items = set()
     print("TEST2")
     for a in soup.select(selector):
@@ -36,7 +36,7 @@ with shelve.open(DB_PATH) as db:
     
     for iid in new:
         print("TEST3")
-        data = {"value1": f"https://skima.jp/item/detail?item_id={iid}"}
+        data = {"value1": f"https://skima.jp/dl/detail?item_id={iid}"}
         r = requests.post(IFTTT_URL, json=data)
         print("POST", iid, "→", r.status_code)
         r.raise_for_status()
