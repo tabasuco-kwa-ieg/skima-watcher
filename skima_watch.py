@@ -11,7 +11,18 @@ KEEP_DAYS = 30
 CACHE     = pathlib.Path(".cache")
 CACHE.mkdir(exist_ok=True)
 DB_PATH   = str(CACHE / "items.db")
-print("TEST1")
+
+def scrape_item(iid: str) -> tuple[str, str]:
+    """id を受け取り、(タイトル, サムネURL) を返す"""
+    url  = f"https://skima.jp/dl/detail?id={iid}"
+    html = requests.get(url, headers=UA).text
+    soup = bs4.BeautifulSoup(html, "html.parser")
+
+    title = soup.select_one("h1").get_text(strip=True)           # 商品名
+    img   = soup.select_one('meta[property="og:image"]')['content']  # OG画像
+    return title, img
+
+
 with shelve.open(DB_PATH) as db:
     prev = db.get("items", {})
 
@@ -21,13 +32,10 @@ with shelve.open(DB_PATH) as db:
     selector = 'a[href^="/dl/detail"]'           # 汎用化
     items = set()
     
-    print("TEST2")
     for a in soup.select(selector):
-        print("TEST2-1")
         m = re.search(r'\d+', a['href'])
         if m:
             items.add(m.group())
-            print("TEST2-2")
     
     print("取得:", len(items), "件", list(items)[:5])
     
@@ -35,11 +43,18 @@ with shelve.open(DB_PATH) as db:
     print("新規:", new)
     
     for iid in new:
-        print("TEST3")
-        data = {"value1": f"https://skima.jp/dl/detail?id={iid}"}
-        r = requests.post(IFTTT_URL, json=data)
-        print("POST", iid, "→", r.status_code)
-        r.raise_for_status()
+        title, thumb = scrape_item(iid)
+        payload = {
+            "username": "SKIMA Watcher",
+            "embeds": [{
+                "title": title,
+                "url": f"https://skima.jp/dl/detail?id={iid}",
+                "thumbnail": {"url": thumb},
+                "color": 0xFFCC00,                      # 好きな16進 → 10進で渡す
+                "footer": {"text": "opt販売 / 自動通知"}
+            }]
+        }
+        requests.post(IFTTT_URL, json=payload).raise_for_status()
 
     # --- 古い ID を整理 ---
     now = datetime.utcnow().isoformat()
