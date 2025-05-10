@@ -14,9 +14,6 @@ with shelve.open(DB_PATH) as db:
     prev = set(db.get("items", []))
 
     html = requests.get(BASE_URL, headers={"User-Agent": "Mozilla/5.0"}).text
-    with open("dump.html", "w", encoding="utf-8") as f:
-        f.write(html[:5000])        # 先頭 5,000 文字だけでも OK
-    print("HTML length:", len(html))
 
     soup  = bs4.BeautifulSoup(html, "html.parser")
     selector = 'a[href^="/dl/detail"]'           # 汎用化
@@ -36,7 +33,7 @@ with shelve.open(DB_PATH) as db:
     
     for iid in new:
         print("TEST3")
-        data = {"value1": f"https://skima.jp/dl/detail?item_id={iid}"}
+        data = {"value1": f"https://skima.jp/dl/detail?id={iid}"}
         r = requests.post(IFTTT_URL, json=data)
         print("POST", iid, "→", r.status_code)
         r.raise_for_status()
@@ -44,8 +41,3 @@ with shelve.open(DB_PATH) as db:
 
     if items != prev:
         db["items"] = list(items)
-
-    if not items - prev:
-        print("（テスト送信）差分が無いのでダミーを送ります")
-        requests.post(IFTTT_URL, json={"content": "Ping from CI"})
-
