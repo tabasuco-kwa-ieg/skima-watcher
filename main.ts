@@ -25,5 +25,4 @@ async function trigger() {
   if (!r.ok) throw new Error(`GitHub dispatch failed ${r.status}`);
 }
 
-/** 5 分おき (*/5) に発火 */
 Deno.cron("github-actions-dispatch", "*/5 * * * *", trigger);
