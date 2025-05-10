@@ -42,7 +42,7 @@ with shelve.open(DB_PATH) as db:
     
     print("取得:", len(items), "件", list(items)[:5])
     
-    new = items - prev
+    new = [iid for iid in items if iid not in prev]
     print("新規:", new)
     
     for iid in new:
