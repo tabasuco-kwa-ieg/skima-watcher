@@ -13,14 +13,22 @@ CACHE.mkdir(exist_ok=True)
 DB_PATH   = str(CACHE / "items.db")
 print("TEST1")
 with shelve.open(DB_PATH) as db:
-    prev = set(db.get("items", []))
+    prev = db.get("items", {})
 
     html = requests.get(BASE_URL, headers={"User-Agent": "Mozilla/5.0"}).text
 
     soup  = bs4.BeautifulSoup(html, "html.parser")
     selector = 'a[href^="/dl/detail"]'           # 汎用化
     items = set()
-
+    
+    print("TEST2")
+    for a in soup.select(selector):
+        print("TEST2-1")
+        m = re.search(r'\d+', a['href'])
+        if m:
+            items.add(m.group())
+            print("TEST2-2")
+            
     now = datetime.utcnow().isoformat()
     for iid in items:
         prev.setdefault(iid, now)
@@ -31,14 +39,6 @@ with shelve.open(DB_PATH) as db:
             if datetime.fromisoformat(ts) > cutoff}
 
     db["items"] = prev
-    
-    print("TEST2")
-    for a in soup.select(selector):
-        print("TEST2-1")
-        m = re.search(r'\d+', a['href'])
-        if m:
-            items.add(m.group())
-            print("TEST2-2")
     
     print("取得:", len(items), "件", list(items)[:5])
     
