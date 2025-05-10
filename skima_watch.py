@@ -15,15 +15,29 @@ CACHE.mkdir(exist_ok=True)
 DB_PATH   = str(CACHE / "items.db")
 
 def scrape_item(iid: str) -> tuple[str, str]:
-    """id を受け取り、(タイトル, サムネURL) を返す"""
-    url  = f"https://skima.jp/dl/detail?id={iid}"
-    html = requests.get(url, headers=UA).text
-    soup = bs4.BeautifulSoup(html, "html.parser")
+    """商品タイトルとサムネ URL を返す。取れなければプレースホルダを返す"""
+    url = f"https://skima.jp/dl/detail?id={iid}"
+    r   = requests.get(url, headers=UA, timeout=10)
+    if r.status_code != 200:
+        print("skip", iid, r.status_code)
+        return f"商品 {iid}", ""
 
-    title = soup.select_one("h1").get_text(strip=True)           # 商品名
-    img   = soup.select_one('meta[property="og:image"]')['content']  # OG画像
-    return title, img
+    soup = bs4.BeautifulSoup(r.text, "html.parser")
 
+    # --- タイトル ---
+    if meta := soup.select_one('meta[property="og:title"]'):
+        title = meta["content"]
+    elif h1 := soup.select_one("h1"):
+        title = h1.get_text(strip=True)
+    else:
+        title = f"商品 {iid}"
+
+    # --- サムネ ---
+    thumb = ""
+    if img := soup.select_one('meta[property="og:image"]'):
+        thumb = img["content"]
+
+    return title, thumb
 
 with shelve.open(DB_PATH) as db:
     prev = db.get("items", {})
