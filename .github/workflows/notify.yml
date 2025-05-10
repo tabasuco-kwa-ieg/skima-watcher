@@ -31,11 +31,5 @@ jobs:
       - run: python skima_watch.py
         env:
           IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
-      
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dump
-          path: dump.html
-          if-no-files-found: ignore
 
 
