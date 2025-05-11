@@ -1,11 +1,6 @@
 name: SKIMA watcher
-
 on:
   workflow_dispatch:
-    inputs:
-      reason:
-        description: Called by Deno.cron
-        required: false
 
 jobs:
   run:
@@ -15,39 +10,34 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+    - uses: actions/setup-python@v5
+      with: { python-version: '3.12' }
 
-      - run: pip install requests beautifulsoup4
+    - run: pip install requests beautifulsoup4
 
-      # ── ① ハッシュ計算（ファイルが無ければ空文字列）
-      - id: hash
-        run: |
-          mkdir -p .cache
-          if [ -f .cache/items.db ]; then
-            echo "filehash=$(sha256sum .cache/items.db | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          else
-            echo "filehash=init" >> $GITHUB_OUTPUT
-          fi
+    # ── 1) まず接頭辞だけで復元
+    - id: restore-cache
+      uses: actions/cache@v4
+      with:
+        path: .cache
+        # （キーはダミー。restore-keys だけで拾わせる）
+        key: dummy-dont-care
+        restore-keys: skima-watch-cache-
 
-      # ── ② キャッシュ復元（接頭辞はハイフン付き）
-      - id: restore-cache
-        uses: actions/cache@v4
-        with:
-          path: .cache
-          key: skima-watch-cache-${{ steps.hash.outputs.filehash }}
-          restore-keys: skima-watch-cache-
+    # ── 2) スクリプト実行（items.db を書き換える）
+    - run: python skima_watch.py
+      env: { IFTTT_KEY: ${{ secrets.IFTTT_KEY }} }
 
-      - run: python skima_watch.py
-        env:
-          IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
+    # ── 3) items.db のハッシュを計算（実行後なので確実に存在）
+    - id: hash
+      run: |
+        HASH=$(sha256sum .cache/items.db | cut -d' ' -f1)
+        echo "filehash=$HASH" >> "$GITHUB_OUTPUT"
 
-      # ── キャッシュ保存（上書き）
-      - name: save-cache
-        uses: actions/cache/save@v4
-        with:
-          path: .cache
-          key: skima-watch-cache-${{ steps.hash.outputs.filehash }}
+    # ── 4) ハッシュ付きキーで保存（毎回ユニーク）
+    - uses: actions/cache/save@v4
+      with:
+        path: .cache
+        key: skima-watch-cache-${{ steps.hash.outputs.filehash }}
