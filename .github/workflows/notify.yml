@@ -13,7 +13,7 @@ jobs:
     # 同時実行を避ける◆
     concurrency:
       group: skima-watch
-      cancel-in-progress: true
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +28,7 @@ jobs:
         with:
           path: .cache
           key: skima-watch-cache
+          restore-keys: skima-watch-cache
 
       - run: python skima_watch.py
         env:
