@@ -28,7 +28,8 @@ jobs:
 
     # ── 2) スクリプト実行（items.db を書き換える）
     - run: python skima_watch.py
-      env: { IFTTT_KEY: ${{ secrets.IFTTT_KEY }} }
+      env:
+        IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
 
     # ── 3) items.db のハッシュを計算（実行後なので確実に存在）
     - id: hash
