@@ -21,28 +21,30 @@ jobs:
 
     - run: pip install requests beautifulsoup4
 
-    # ── 1) まず接頭辞だけで復元
+    # ── 1) 復元（prefix マッチ）
     - id: restore-cache
       uses: actions/cache@v4
       with:
         path: .cache
-        # （キーはダミー。restore-keys だけで拾わせる）
         key: dummy-dont-care
         restore-keys: skima-watch-cache-
-
-    # ── 2) スクリプト実行（items.db を書き換える）
+    
+    # ── 2) スクリプト実行
     - run: python skima_watch.py
       env:
         IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
-
-    # ── 3) items.db のハッシュを計算（実行後なので確実に存在）
+    
+    # ── 3) ハッシュとフルキーを出力
     - id: hash
       run: |
         HASH=$(sha256sum .cache/items.db | cut -d' ' -f1)
         echo "filehash=$HASH" >> "$GITHUB_OUTPUT"
-
-    # ── 4) ハッシュ付きキーで保存（毎回ユニーク）
-    - uses: actions/cache/save@v4
+        echo "fullkey=skima-watch-cache-$HASH" >> "$GITHUB_OUTPUT"
+    
+    # ── 4) 変更がある時だけ保存
+    - name: save-cache
+      if: steps.hash.outputs.fullkey != steps.restore-cache.outputs.cache-primary-key
+      uses: actions/cache/save@v4
       with:
         path: .cache
-        key: skima-watch-cache-${{ steps.hash.outputs.filehash }}
+        key: ${{ steps.hash.outputs.fullkey }}
