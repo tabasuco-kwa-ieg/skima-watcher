@@ -24,10 +24,14 @@ jobs:
       - run: pip install requests beautifulsoup4
 
       # shelve の DB をキャッシュ◆
+      - id: hash
+        run: |
+          echo "filehash=$(sha256sum .cache/items.db | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+      
       - uses: actions/cache@v4
         with:
           path: .cache
-          key: skima-watch-cache
+          key: skima-watch-cache${{ steps.hash.outputs.filehash }}
           restore-keys: skima-watch-cache
 
       - run: python skima_watch.py
