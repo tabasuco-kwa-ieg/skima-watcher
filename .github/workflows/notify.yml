@@ -1,6 +1,10 @@
 name: SKIMA watcher
 on:
   workflow_dispatch:
+    inputs:
+      reason:                 # ★これがないと422
+        description: Called by Deno.cron
+        required: false
 
 jobs:
   run:
