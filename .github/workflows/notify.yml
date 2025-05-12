@@ -24,21 +24,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .cache
-          key: dummy
+          key: restore-${{ github.run_id }}
           restore-keys: skima-watch-cache-
     
       - run: python skima_watch.py
         env: 
           IFTTT_KEY: ${{ secrets.IFTTT_KEY }} 
     
-      # ── ハッシュ＋タイムスタンプ付きキー生成
+      # 2) ハッシュ＋UTC 日時キーを生成
       - id: hash
         run: |
           HASH=$(sha256sum .cache/items.db | cut -d' ' -f1)
           TS=$(date -u '+%Y%m%d%H%M%S')
           echo "fullkey=skima-watch-cache-${TS}-${HASH}" >> $GITHUB_OUTPUT
-    
-      # ── 必ず新キーで保存
+      
+      # 3) 保存
       - uses: actions/cache/save@v4
         with:
           path: .cache
