@@ -8,43 +8,33 @@ on:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: skima-watch
-      cancel-in-progress: false
-
     steps:
-    - uses: actions/checkout@v4
-
-    - uses: actions/setup-python@v5
-      with: { python-version: '3.12' }
-
-    - run: pip install requests beautifulsoup4
-
-    # ── 1) 復元（prefix マッチ）
-    - id: restore-cache
-      uses: actions/cache@v4
-      with:
-        path: .cache
-        key: dummy-dont-care
-        restore-keys: skima-watch-cache-
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests beautifulsoup4
     
-    # ── 2) スクリプト実行
-    - run: python skima_watch.py
-      env:
-        IFTTT_KEY: ${{ secrets.IFTTT_KEY }}
+      # ── 仮キーで復元（まだ hash step が無いので先に置く）
+      - id: restore-cache
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: dummy
+          restore-keys: skima-watch-cache-
     
-    # ── 3) ハッシュとフルキーを出力
-    - id: hash
-      run: |
-        HASH=$(sha256sum .cache/items.db | cut -d' ' -f1)
-        echo "filehash=$HASH" >> "$GITHUB_OUTPUT"
-        echo "fullkey=skima-watch-cache-$HASH" >> "$GITHUB_OUTPUT"
+      - run: python skima_watch.py
+        env: 
+          IFTTT_KEY: ${{ secrets.IFTTT_KEY }} 
     
-    # ── 4) 変更がある時だけ保存
-    - name: save-cache
-      if: steps.hash.outputs.fullkey != steps.restore-cache.outputs.cache-primary-key
-      uses: actions/cache/save@v4
-      with:
-        path: .cache
-        key: ${{ steps.hash.outputs.fullkey }}
+      # ── ハッシュ＋タイムスタンプ付きキー生成
+      - id: hash
+        run: |
+          HASH=$(sha256sum .cache/items.db | cut -d' ' -f1)
+          TS=$(date -u '+%Y%m%d%H%M%S')
+          echo "fullkey=skima-watch-cache-${TS}-${HASH}" >> $GITHUB_OUTPUT
+    
+      # ── 必ず新キーで保存
+      - uses: actions/cache/save@v4
+        with:
+          path: .cache
+          key: ${{ steps.hash.outputs.fullkey }}
