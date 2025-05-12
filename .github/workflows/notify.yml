@@ -8,6 +8,11 @@ on:
 
 jobs:
   run:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: skima-watch
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
