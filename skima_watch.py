@@ -5,7 +5,7 @@ SELLER_ID = "151777"                      # ←監視したい出品者のID
 BASE_URL  = f"https://skima.jp/profile/dl_products?id={SELLER_ID}"
 IFTTT_KEY = os.getenv("IFTTT_KEY")        # GitHub Secrets から取得
 IFTTT_URL = f"https://maker.ifttt.com/trigger/skima_opt_new/with/key/{IFTTT_KEY}"
-KEEP_DAYS = 1
+KEEP_DAYS = 30
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
 
