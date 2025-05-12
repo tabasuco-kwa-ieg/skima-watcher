@@ -1,7 +1,7 @@
 import json, re, os, requests, bs4, shelve, pathlib
 from datetime import datetime, timedelta
 
-SELLER_ID = "151777"                      # ←監視したい出品者のID
+SELLER_ID = "446559"                      # ←監視したい出品者のID
 BASE_URL  = f"https://skima.jp/profile/dl_products?id={SELLER_ID}"
 IFTTT_KEY = os.getenv("IFTTT_KEY")        # GitHub Secrets から取得
 IFTTT_URL = f"https://maker.ifttt.com/trigger/skima_opt_new/with/key/{IFTTT_KEY}"
