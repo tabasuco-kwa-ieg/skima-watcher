@@ -38,8 +38,8 @@ jobs:
           echo "fullkey=skima-watch-cache-${TS}-${HASH}" >> $GITHUB_OUTPUT
       
       # 3) 保存
-       - name: save-cache
-         uses: actions/cache/save@v4
-         with:
-           path: .cache
-           key: skima-watch-cache
+      - name: save-cache
+        uses: actions/cache/save@v4
+        with:
+          path: .cache
+          key: skima-watch-cache
