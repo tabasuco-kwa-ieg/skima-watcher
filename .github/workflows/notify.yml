@@ -1,6 +1,10 @@
 name: SKIMA watcher
 on:
   workflow_dispatch:
+    inputs:
+      reason:
+        description: Called by Deno.cron
+        required: false
 
 permissions:
   actions: write        # ← キャッシュ削除に必須
